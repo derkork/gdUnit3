@@ -91,8 +91,27 @@ func rescan(update_scripts :bool = false) -> void:
 	while fs.is_scanning():
 		yield(get_tree().create_timer(1), "timeout")
 	if update_scripts:
-		plugin.get_editor_interface().get_resource_filesystem().update_script_classes()
+		refresh_classes(fs, "res://addons/gdUnit3")
+		fs.update_script_classes()
 	plugin.free()
+
+# Rescans all classes located under the given path.
+# The class content can be changed after an update and is strictly need to refresh the Godot internal class cache 
+static func refresh_classes(fs :EditorFileSystem, path :String) -> Result:
+	var dir := Directory.new()
+	var err := dir.open(path)
+	if err != OK:
+		return Result.error("Can't find directory %s" % path)
+		
+	var files := GdUnitTools.scan_dir(path)
+	for file in files:
+		var file_path := "%s/%s" % [path, file]
+		if dir.dir_exists(file_path):
+			refresh_classes(fs, file_path)
+		else:
+			fs.update_file(file_path)
+	return Result.success(true)
+
 
 func is_update_in_progress() -> bool:
 	return _update_in_progress
