@@ -13,13 +13,13 @@ func before():
 	Engine.get_main_loop().root.add_child(_executor)
 	_executor.connect("send_event_debug", self, "_on_executor_event")
 
-func resource(resource_path :String) -> GdUnitTestSuite:
+func resource(resource_path :String) -> GdUnitTestSuiteDelegator:
 	return GdUnitTestResourceLoader.load_test_suite(resource_path)
 
 func _on_executor_event(event :GdUnitEvent) -> void:
 	_events.append(event)
 
-func execute(test_suite :GdUnitTestSuite, enable_orphan_detection := true):
+func execute(test_suite :GdUnitTestSuiteDelegator, enable_orphan_detection := true):
 	yield(get_tree(), "idle_frame")
 	_events.clear()
 	_executor._memory_pool.configure(enable_orphan_detection)
@@ -82,7 +82,7 @@ func assert_event_states(events :Array) -> GdUnitArrayAssert:
 func test_execute_success() -> void:
 	var test_suite := resource("res://addons/gdUnit3/test/core/resources/testsuites/TestSuiteAllStagesSuccess.resource")
 	# verify all test cases loaded
-	assert_array(test_suite.get_children()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
+	assert_array(test_suite.get_test_cases()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
 	# simulate test suite execution
 	var events = yield(execute(test_suite), "completed" )
 	# verify basis infos
@@ -110,7 +110,7 @@ func test_execute_success() -> void:
 func test_execute_failure_on_stage_before() -> void:
 	var test_suite := resource("res://addons/gdUnit3/test/core/resources/testsuites/TestSuiteFailOnStageBefore.resource")
 	# verify all test cases loaded
-	assert_array(test_suite.get_children()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
+	assert_array(test_suite.get_test_cases()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
 	# simulate test suite execution
 	var events = yield(execute(test_suite), "completed" )
 	# verify basis infos
@@ -147,7 +147,7 @@ func test_execute_failure_on_stage_before() -> void:
 func test_execute_failure_on_stage_after() -> void:
 	var test_suite := resource("res://addons/gdUnit3/test/core/resources/testsuites/TestSuiteFailOnStageAfter.resource")
 	# verify all test cases loaded
-	assert_array(test_suite.get_children()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
+	assert_array(test_suite.get_test_cases()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
 	# simulate test suite execution
 	var events = yield(execute(test_suite), "completed" )
 	# verify basis infos
@@ -184,7 +184,7 @@ func test_execute_failure_on_stage_after() -> void:
 func test_execute_failure_on_stage_before_test() -> void:
 	var test_suite := resource("res://addons/gdUnit3/test/core/resources/testsuites/TestSuiteFailOnStageBeforeTest.resource")
 	# verify all test cases loaded
-	assert_array(test_suite.get_children()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
+	assert_array(test_suite.get_test_cases()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
 	# simulate test suite execution
 	var events = yield(execute(test_suite), "completed" )
 	# verify basis infos
@@ -224,7 +224,7 @@ func test_execute_failure_on_stage_before_test() -> void:
 func test_execute_failure_on_stage_after_test() -> void:
 	var test_suite := resource("res://addons/gdUnit3/test/core/resources/testsuites/TestSuiteFailOnStageAfterTest.resource")
 	# verify all test cases loaded
-	assert_array(test_suite.get_children()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
+	assert_array(test_suite.get_test_cases()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
 	# simulate test suite execution
 	var events = yield(execute(test_suite), "completed" )
 	# verify basis infos
@@ -264,7 +264,7 @@ func test_execute_failure_on_stage_after_test() -> void:
 func test_execute_failure_on_stage_test_case1() -> void:
 	var test_suite := resource("res://addons/gdUnit3/test/core/resources/testsuites/TestSuiteFailOnStageTestCase1.resource")
 	# verify all test cases loaded
-	assert_array(test_suite.get_children()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
+	assert_array(test_suite.get_test_cases()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
 	# simulate test suite execution
 	var events = yield(execute(test_suite), "completed" )
 	# verify basis infos
@@ -302,7 +302,7 @@ func test_execute_failure_on_muliple_stages() -> void:
 	# this is a more complex failure state, we expect to find multipe failures on different stages
 	var test_suite := resource("res://addons/gdUnit3/test/core/resources/testsuites/TestSuiteFailOnMultipeStages.resource")
 	# verify all test cases loaded
-	assert_array(test_suite.get_children()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
+	assert_array(test_suite.get_test_cases()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
 	# simulate test suite execution
 	var events = yield(execute(test_suite), "completed" )
 	# verify basis infos
@@ -345,7 +345,7 @@ func test_execute_failure_and_orphans() -> void:
 	# this is a more complex failure state, we expect to find multipe orphans on different stages
 	var test_suite := resource("res://addons/gdUnit3/test/core/resources/testsuites/TestSuiteFailAndOrpahnsDetected.resource")
 	# verify all test cases loaded
-	assert_array(test_suite.get_children()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
+	assert_array(test_suite.get_test_cases()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
 	# simulate test suite execution
 	var events = yield(execute(test_suite), "completed")
 	# verify basis infos
@@ -396,7 +396,7 @@ func test_execute_failure_and_orphans_report_orphan_disabled() -> void:
 	# this is a more complex failure state, we expect to find multipe orphans on different stages
 	var test_suite := resource("res://addons/gdUnit3/test/core/resources/testsuites/TestSuiteFailAndOrpahnsDetected.resource")
 	# verify all test cases loaded
-	assert_array(test_suite.get_children()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
+	assert_array(test_suite.get_test_cases()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
 	# simulate test suite execution whit disabled orphan detection
 	var events = yield(execute(test_suite, false), "completed")
 	# verify basis infos
@@ -438,7 +438,7 @@ func test_execute_error_on_test_timeout() -> void:
 	# this tests a timeout on a test case reported as error
 	var test_suite := resource("res://addons/gdUnit3/test/core/resources/testsuites/TestSuiteErrorOnTestTimeout.resource")
 	# verify all test cases loaded
-	assert_array(test_suite.get_children()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
+	assert_array(test_suite.get_test_cases()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
 	# simulate test suite execution
 	var events = yield(execute(test_suite), "completed" )
 	# verify basis infos
@@ -480,7 +480,7 @@ func test_execute_failure_fuzzer_iteration() -> void:
 	var test_suite := resource("res://addons/gdUnit3/test/core/resources/testsuites/GdUnitFuzzerTest.resource")
 	# verify all test cases loaded
 	var expected_test_cases := ["test_multi_yielding_with_fuzzer", "test_multi_yielding_with_fuzzer_fail_after_3_iterations"]
-	assert_array(test_suite.get_children()).extract("get_name").contains_exactly(expected_test_cases)
+	assert_array(test_suite.get_test_cases()).extract("get_name").contains_exactly(expected_test_cases)
 	# simulate test suite execution
 	var events = yield(execute(test_suite), "completed" )
 	
@@ -518,7 +518,7 @@ func test_execute_failure_fuzzer_iteration() -> void:
 func test_execute_add_child_on_before_GD_106() -> void:
 	var test_suite := resource("res://addons/gdUnit3/test/core/resources/testsuites/TestSuiteFailAddChildStageBefore.resource")
 	# verify all test cases loaded
-	assert_array(test_suite.get_children()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
+	assert_array(test_suite.get_test_cases()).extract("get_name").contains_exactly(["test_case1", "test_case2"])
 	# simulate test suite execution
 	var events = yield(execute(test_suite), "completed" )
 	# verify basis infos

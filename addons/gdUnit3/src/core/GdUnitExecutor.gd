@@ -57,7 +57,7 @@ func fire_event(event :GdUnitEvent) -> void:
 	else:
 		emit_signal("send_event", event)
 
-func suite_before(test_suite :GdUnitTestSuite, total_count :int) -> GDScriptFunctionState:
+func suite_before(test_suite :GdUnitTestSuiteDelegator, total_count :int) -> GDScriptFunctionState:
 	set_stage(STAGE_TEST_SUITE_BEFORE)
 	fire_event(GdUnitEvent.new()\
 		.suite_before(test_suite.get_script().resource_path, test_suite.get_name(), total_count))
@@ -74,7 +74,7 @@ func suite_before(test_suite :GdUnitTestSuite, total_count :int) -> GDScriptFunc
 	GdUnitTools.run_auto_close()
 	return null
 
-func suite_after(test_suite :GdUnitTestSuite) -> GDScriptFunctionState:
+func suite_after(test_suite :GdUnitTestSuiteDelegator) -> GDScriptFunctionState:
 	set_stage(STAGE_TEST_SUITE_AFTER)
 	GdUnitTools.clear_tmp()
 	
@@ -117,7 +117,7 @@ func suite_after(test_suite :GdUnitTestSuite) -> GDScriptFunctionState:
 	_report_collector.clear_reports(STAGE_TEST_SUITE_BEFORE|STAGE_TEST_SUITE_AFTER)
 	return null
 
-func test_before(test_suite :GdUnitTestSuite, test_case :_TestCase) -> GDScriptFunctionState:
+func test_before(test_suite :GdUnitTestSuiteDelegator, test_case :_TestCase) -> GDScriptFunctionState:
 	set_stage(STAGE_TEST_CASE_BEFORE)
 	_memory_pool.set_pool(test_suite, GdUnitMemoryPool.TEST_SETUP, true)
 	
@@ -135,7 +135,7 @@ func test_before(test_suite :GdUnitTestSuite, test_case :_TestCase) -> GDScriptF
 	GdUnitTools.run_auto_close()
 	return null
 
-func test_after(test_suite :GdUnitTestSuite, test_case :_TestCase) -> GDScriptFunctionState:
+func test_after(test_suite :GdUnitTestSuiteDelegator, test_case :_TestCase) -> GDScriptFunctionState:
 	set_stage(STAGE_TEST_CASE_AFTER)
 	_memory_pool.set_pool(test_suite, GdUnitMemoryPool.TEST_SETUP)
 	
@@ -177,7 +177,7 @@ func test_after(test_suite :GdUnitTestSuite, test_case :_TestCase) -> GDScriptFu
 	_report_collector.clear_reports(STAGE_TEST_CASE_BEFORE|STAGE_TEST_CASE_EXECUTE|STAGE_TEST_CASE_AFTER)
 	return null
 
-func execute_test_case(test_suite :GdUnitTestSuite, test_case :_TestCase) -> GDScriptFunctionState:
+func execute_test_case(test_suite :GdUnitTestSuiteDelegator, test_case :_TestCase) -> GDScriptFunctionState:
 	_test_run_state = test_before(test_suite, test_case)
 	if GdUnitTools.is_yielded(_test_run_state):
 		yield(_test_run_state, "completed")
@@ -235,7 +235,7 @@ func execute_test_case(test_suite :GdUnitTestSuite, test_case :_TestCase) -> GDS
 		_test_run_state = null
 	return _test_run_state
 
-func execute(test_suite :GdUnitTestSuite) -> GDScriptFunctionState:
+func execute(test_suite :GdUnitTestSuiteDelegator) -> GDScriptFunctionState:
 	# stop on first error if fail fast enabled
 	if _fail_fast and _total_test_failed > 0:
 		test_suite.free()
@@ -243,13 +243,14 @@ func execute(test_suite :GdUnitTestSuite) -> GDScriptFunctionState:
 	
 	_report_collector.register_report_provider(test_suite)
 	add_child(test_suite)
-	var fs = suite_before(test_suite, test_suite.get_child_count())
+	
+	var fs = suite_before(test_suite, test_suite.get_test_cases_count())
 	if GdUnitTools.is_yielded(fs):
 		yield(fs, "completed")
 	
 	if not test_suite.is_skipped():
-		for test_case_index in test_suite.get_child_count():
-			var test_case = test_suite.get_child(test_case_index)
+		for test_case_index in test_suite.get_test_cases_count():
+			var test_case = test_suite.get_test_case(test_case_index)
 			# only iterate over test case, we need to filter because of possible adding other child types on before() or before_test()
 			if not test_case is _TestCase:
 				continue
@@ -265,7 +266,7 @@ func execute(test_suite :GdUnitTestSuite) -> GDScriptFunctionState:
 					# it needs to go this hard way to kill the outstanding yields of a test case when the test timed out
 					# we delete the current test suite where is execute the current test case to kill the function state
 					# and replace it by a clone without function state
-					test_suite = clone_test_suite(test_suite)
+					test_suite = test_suite.clone()
 	
 	fs = suite_after(test_suite)
 	if GdUnitTools.is_yielded(fs):
@@ -274,30 +275,9 @@ func execute(test_suite :GdUnitTestSuite) -> GDScriptFunctionState:
 	test_suite.free()
 	return null
 
-# clones a test suite and moves the test cases to new instance
-func clone_test_suite(test_suite :GdUnitTestSuite) -> GdUnitTestSuite:
-	var _test_suite = test_suite.duplicate()
-	# copy all property values
-	for property in test_suite.get_property_list():
-		var property_name = property["name"]
-		_test_suite.set(property_name, test_suite.get(property_name))
-	
-	# remove incomplete duplicated childs
-	for child in _test_suite.get_children():
-		_test_suite.remove_child(child)
-		child.free()
-	assert(_test_suite.get_child_count() == 0)
-	# now move original test cases to duplicated test suite
-	for child in test_suite.get_children():
-		child.get_parent().remove_child(child)
-		_test_suite.add_child(child)
-	# finally free current test suite instance
-	remove_child(test_suite)
-	test_suite.free()
-	add_child(_test_suite)
-	return _test_suite
 
-static func create_fuzzers(test_suite :GdUnitTestSuite, test_case :_TestCase) -> Array:
+
+static func create_fuzzers(test_suite :GdUnitTestSuiteDelegator, test_case :_TestCase) -> Array:
 	if not test_case.has_fuzzer():
 		return Array()
 	var fuzzers := Array()

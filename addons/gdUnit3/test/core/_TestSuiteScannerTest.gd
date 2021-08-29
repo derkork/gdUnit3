@@ -125,11 +125,14 @@ func test_build_test_suite_path() -> void:
 
 func test_parse_and_add_test_cases() -> void:
 	var default_time := GdUnitSettings.test_timeout()
-	var scanner = auto_free(_TestSuiteScanner.new())
+	var scanner :_TestSuiteScanner = auto_free(_TestSuiteScanner.new())
+	# fake a test suite
 	var test_suite :GdUnitTestSuite = auto_free(GdUnitTestSuite.new())
-	var script_path := "res://addons/gdUnit3/test/core/resources/test_script_with_arguments.gd"
+	var script := GDScript.new()
+	script.resource_path = "res://addons/gdUnit3/test/core/resources/test_script_with_arguments.gd"
+	test_suite.set_script(script)
 	var test_case_names := PoolStringArray(["test_no_args", "test_with_timeout", "test_with_fuzzer", "test_with_fuzzer_iterations", "test_with_multible_fuzzers"])
-	scanner._parse_and_add_test_cases(test_suite, script_path, test_case_names)
+	scanner._parse_and_add_test_cases(test_suite, test_suite.get_script(), test_case_names)
 	assert_array(test_suite.get_children())\
 		.extractv(extr("get_name"), extr("timeout"), extr("fuzzers"), extr("iterations"))\
 		.contains_exactly([
@@ -143,7 +146,7 @@ func test_scan_by_inheritance_class_name() -> void:
 	var scanner :_TestSuiteScanner = auto_free(_TestSuiteScanner.new())
 	var test_suites := scanner.scan("res://addons/gdUnit3/test/core/resources/scan_testsuite_inheritance/by_class_name/")
 	
-	assert_array(test_suites).extractv(extr("get_name"), extr("get_script.get_path"), extr("get_children.get_name"))\
+	assert_array(test_suites).extractv(extr("get_name"), extr("get_script.get_path"), extr("get_test_cases.get_name"))\
 		.contains_exactly_in_any_order([
 			tuple("BaseTest", "res://addons/gdUnit3/test/core/resources/scan_testsuite_inheritance/by_class_name/BaseTest.gd", ["test_foo1"]),
 			tuple("ExtendedTest","res://addons/gdUnit3/test/core/resources/scan_testsuite_inheritance/by_class_name/ExtendedTest.gd", ["test_foo2", "test_foo1"]), 
@@ -157,7 +160,7 @@ func test_scan_by_inheritance_class_path() -> void:
 	var scanner :_TestSuiteScanner = auto_free(_TestSuiteScanner.new())
 	var test_suites := scanner.scan("res://addons/gdUnit3/test/core/resources/scan_testsuite_inheritance/by_class_path/")
 	
-	assert_array(test_suites).extractv(extr("get_name"), extr("get_script.get_path"), extr("get_children.get_name"))\
+	assert_array(test_suites).extractv(extr("get_name"), extr("get_script.get_path"), extr("get_test_cases.get_name"))\
 		.contains_exactly_in_any_order([
 			tuple("BaseTest", "res://addons/gdUnit3/test/core/resources/scan_testsuite_inheritance/by_class_path/BaseTest.gd", ["test_foo1"]),
 			tuple("ExtendedTest","res://addons/gdUnit3/test/core/resources/scan_testsuite_inheritance/by_class_path/ExtendedTest.gd", ["test_foo2", "test_foo1"]), 
@@ -166,3 +169,13 @@ func test_scan_by_inheritance_class_path() -> void:
 	# finally free all scaned test suites
 	for ts in test_suites:
 		ts.free()
+
+func test_is_script_format_supported() -> void:
+	assert_bool(_TestSuiteScanner._is_script_format_supported("res://exampe.gd")).is_true()
+	if GdUnitTools.is_mono_supported():
+		assert_bool(_TestSuiteScanner._is_script_format_supported("res://exampe.cs")).is_true()
+	else:
+		assert_bool(_TestSuiteScanner._is_script_format_supported("res://exampe.cs")).is_false()
+	assert_bool(_TestSuiteScanner._is_script_format_supported("res://exampe.gdns")).is_false()
+	assert_bool(_TestSuiteScanner._is_script_format_supported("res://exampe.vs")).is_false()
+	assert_bool(_TestSuiteScanner._is_script_format_supported("res://exampe.tres")).is_false()

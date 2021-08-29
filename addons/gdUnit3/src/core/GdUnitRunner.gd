@@ -58,7 +58,7 @@ func _process(delta):
 				_state = STOP
 			else:
 				# process next test suite
-				var test_suite := _test_suites_to_process.pop_front() as GdUnitTestSuite
+				var test_suite := _test_suites_to_process.pop_front() as GdUnitTestSuiteDelegator
 				var fs = _executor.execute(test_suite)
 				# is yielded than wait for completed
 				if GdUnitTools.is_yielded(fs):
@@ -99,30 +99,26 @@ func gdUnitInit() -> void:
 	send_message("Scaned %d test suites" % _test_suites_to_process.size())
 	var total_count = _collect_test_case_count(_test_suites_to_process)
 	_on_Executor_send_event(GdUnitInit.new(_test_suites_to_process.size(), total_count))
-	for t in _test_suites_to_process:
-		var test_suite := t as GdUnitTestSuite
+	for test_suite in _test_suites_to_process:
 		send_test_suite(test_suite)
 
-func _filter_test_case(test_suites :Array, test_case_names :Array) -> void:
-	if test_case_names.empty():
+func _filter_test_case(test_suites :Array, includes_tests :Array) -> void:
+	if includes_tests.empty():
 		return
 	for test_suite in test_suites:
-		for test_case in test_suite.get_children():
-			if not test_case_names.has(test_case.get_name()):
-				test_suite.remove_child(test_case)
-				test_case.free()
+		test_suite.filter_tests(includes_tests)
 
 func _collect_test_case_count(testSuites :Array) -> int:
 	var total :int = 0
 	for test_suite in testSuites:
-		total += (test_suite as Node).get_child_count()
+		total += (test_suite as GdUnitTestSuiteDelegator).get_test_cases_count()
 	return total
 
 # RPC send functions
 func send_message(message :String):
 	_client.rpc_send(RPCMessage.of(message))
 
-func send_test_suite(test_suite :GdUnitTestSuite):
+func send_test_suite(test_suite :GdUnitTestSuiteDelegator):
 	_client.rpc_send(RPCGdUnitTestSuite.of(test_suite))
 
 func _on_Executor_send_event(event :GdUnitEvent):
