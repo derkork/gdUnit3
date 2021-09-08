@@ -1,12 +1,11 @@
 using Godot;
-using System;
 
 namespace GdUnit3
 {
-    public sealed class GdUnitFloatAssertWrapper : GdUnitNumberAssertWrapper<double>, IGdUnitFloatAssert
+    public sealed class DoubleAssert : NumberAssert<double>, IDoubleAssert
     {
         private static Godot.GDScript AssertImpl = GD.Load<GDScript>("res://addons/gdUnit3/src/asserts/GdUnitFloatAssertImpl.gd");
-        public GdUnitFloatAssertWrapper(object caller, object current, IGdUnitAssert.EXPECT expectResult)
+        public DoubleAssert(object caller, object current, IAssert.EXPECT expectResult)
             : base((Godot.Reference)AssertImpl.New(caller, current, expectResult), current)
         {
         }

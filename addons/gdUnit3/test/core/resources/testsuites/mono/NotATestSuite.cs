@@ -1,10 +1,8 @@
 using Godot;
-using System;
 using GdUnit3;
 
-
 // will be ignored becaus of missing `[TestSuite]` animation
-public class NotATestSuite : GdUnitTestSuite
+public class NotATestSuite : TestSuite
 {
 
     public override void Before()
@@ -17,5 +15,4 @@ public class NotATestSuite : GdUnitTestSuite
     {
         AssertBool(true).IsEqual(false);
     }
-
 }

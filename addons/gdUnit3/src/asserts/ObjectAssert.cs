@@ -3,7 +3,7 @@ using System;
 
 namespace GdUnit3
 {
-    public sealed class GdUnitObjectAssertWrapper : GdUnitAssertBase<object>, IGdUnitObjectAssert
+    public sealed class ObjectAssert : AssertBase<object>, IObjectAssert
     {
         private static Godot.GDScript AssertImpl = GD.Load<GDScript>("res://addons/gdUnit3/src/asserts/GdUnitObjectAssertImpl.gd");
 
@@ -11,14 +11,14 @@ namespace GdUnit3
 
         private readonly Godot.Reference _messageBuilder;
 
-        public GdUnitObjectAssertWrapper(object caller, object current, IGdUnitAssert.EXPECT expectResult)
+        public ObjectAssert(object caller, object current, IAssert.EXPECT expectResult)
             : base((Godot.Reference)AssertImpl.New(caller, current, expectResult), current)
         {
             _messageBuilder = GdAssertMessages.New() as Godot.Reference;
         }
 
 
-        public IGdUnitObjectAssert IsNotInstanceof<ExpectedType>()
+        public IObjectAssert IsNotInstanceof<ExpectedType>()
         {
             if (_current is ExpectedType)
             {
@@ -30,20 +30,19 @@ namespace GdUnit3
             return this;
         }
 
-        public IGdUnitObjectAssert IsNotSame(object expected)
+        public IObjectAssert IsNotSame(object expected)
         {
             _delegator.Call("is_not_same", expected);
             return this;
         }
 
-        public IGdUnitObjectAssert IsSame(object expected)
+        public IObjectAssert IsSame(object expected)
         {
             _delegator.Call("is_same", expected);
             return this;
         }
 
-
-        public IGdUnitObjectAssert IsInstanceof<ExpectedType>()
+        public IObjectAssert IsInstanceof<ExpectedType>()
         {
             if (!(_current is ExpectedType))
             {

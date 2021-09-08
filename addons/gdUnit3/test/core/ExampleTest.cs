@@ -1,11 +1,9 @@
 using Godot;
-using System;
 using GdUnit3;
 
 
-
 [TestSuite]
-public class ExampleTest : GdUnitTestSuite
+public class ExampleTest : TestSuite
 {
     public override void Before()
     {

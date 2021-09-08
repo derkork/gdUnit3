@@ -1,10 +1,9 @@
 using Godot;
 using GdUnit3;
-using static GdUnit3.IGdUnitAssert.EXPECT;
-using static GdUnit3.IGdUnitStringAssert.Compare;
+using static GdUnit3.IAssert.EXPECT;
 
 [TestSuite]
-public class GdUnitObjectAssertImplTest : GdUnitTestSuite
+public class ObjectAssertTest : TestSuite
 {
 
     class CustomClass

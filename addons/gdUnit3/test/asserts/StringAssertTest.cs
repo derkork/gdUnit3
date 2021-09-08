@@ -1,10 +1,10 @@
 
 using GdUnit3;
-using static GdUnit3.IGdUnitAssert.EXPECT;
-using static GdUnit3.IGdUnitStringAssert.Compare;
+using static GdUnit3.IAssert.EXPECT;
+using static GdUnit3.IStringAssert.Compare;
 
 [TestSuite]
-public class GdUnitStringAssertImplTest : GdUnitTestSuite
+public class StringAssertTest : TestSuite
 {
     [TestCase]
     public void IsNull()

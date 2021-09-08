@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Diagnostics;
 
 namespace GdUnit3
 {
@@ -24,28 +25,8 @@ namespace GdUnit3
     </code>
     </example>
     </summary> */
-    public abstract class GdUnitTestSuite : Node
+    public abstract class TestSuite : Node
     {
-
-
-        [AttributeUsage(AttributeTargets.Class)]
-        public class TestSuiteAttribute : Attribute
-        {
-        }
-
-        [AttributeUsage(AttributeTargets.Method)]
-        public class TestCaseAttribute : Attribute
-        {
-            public readonly int Timeout = -1;
-            public readonly int Line;
-
-            public TestCaseAttribute([System.Runtime.CompilerServices.CallerLineNumber] int line = 0)
-            {
-                Line = line;
-            }
-        }
-
-
         private bool _scipped = false;
         private String _active_test_case;
 
@@ -53,7 +34,7 @@ namespace GdUnit3
 
 
 
-        ~GdUnitTestSuite()
+        ~TestSuite()
         {
         }
 
@@ -122,29 +103,29 @@ namespace GdUnit3
         }
 
         // === Asserts ==================================================================
-        public IGdUnitBoolAssert AssertBool(bool current, IGdUnitAssert.EXPECT expectResult = IGdUnitAssert.EXPECT.SUCCESS)
+        public IBoolAssert AssertBool(bool current, IAssert.EXPECT expectResult = IAssert.EXPECT.SUCCESS)
         {
-            return new GdUnitBoolAssertWrapper(this, current, expectResult);
+            return new BoolAssert(this, current, expectResult);
         }
 
-        public IGdUnitStringAssert AssertString(string current, IGdUnitAssert.EXPECT expectResult = IGdUnitAssert.EXPECT.SUCCESS)
+        public IStringAssert AssertString(string current, IAssert.EXPECT expectResult = IAssert.EXPECT.SUCCESS)
         {
-            return new GdUnitStringAssertWrapper(this, current, expectResult);
+            return new StringAssert(this, current, expectResult);
         }
 
-        public IGdUnitIntAssert AssertInt(int current, IGdUnitAssert.EXPECT expectResult = IGdUnitAssert.EXPECT.SUCCESS)
+        public IIntAssert AssertInt(int current, IAssert.EXPECT expectResult = IAssert.EXPECT.SUCCESS)
         {
-            return new GdUnitIntAssertWrapper(this, current, expectResult);
+            return new IntAssert(this, current, expectResult);
         }
 
-        public IGdUnitFloatAssert AssertFloat(double current, IGdUnitAssert.EXPECT expectResult = IGdUnitAssert.EXPECT.SUCCESS)
+        public IDoubleAssert AssertFloat(double current, IAssert.EXPECT expectResult = IAssert.EXPECT.SUCCESS)
         {
-            return new GdUnitFloatAssertWrapper(this, current, expectResult);
+            return new DoubleAssert(this, current, expectResult);
         }
 
-        public IGdUnitObjectAssert AssertObject(object current, IGdUnitAssert.EXPECT expectResult = IGdUnitAssert.EXPECT.SUCCESS)
+        public IObjectAssert AssertObject(object current, IAssert.EXPECT expectResult = IAssert.EXPECT.SUCCESS)
         {
-            return new GdUnitObjectAssertWrapper(this, current, expectResult);
+            return new ObjectAssert(this, current, expectResult);
         }
     }
 

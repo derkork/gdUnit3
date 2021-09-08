@@ -1,13 +1,13 @@
 using GdUnit3;
 
 [TestSuite]
-public class GdUnitBoolAssertImplTest : GdUnitTestSuite
+public class BoolAssertTest : TestSuite
 {
     [TestCase]
     public void IsTrue()
     {
         AssertBool(true).IsTrue();
-        AssertBool(false, IGdUnitAssert.EXPECT.FAIL).IsTrue()
+        AssertBool(false, IAssert.EXPECT.FAIL).IsTrue()
             .HasFailureMessage("Expecting: 'True' but is 'False'");
     }
 
@@ -15,17 +15,17 @@ public class GdUnitBoolAssertImplTest : GdUnitTestSuite
     public void IsFalse()
     {
         AssertBool(false).IsFalse();
-        AssertBool(true, IGdUnitAssert.EXPECT.FAIL).IsFalse()
+        AssertBool(true, IAssert.EXPECT.FAIL).IsFalse()
             .HasFailureMessage("Expecting: 'False' but is 'True'");
     }
 
     [TestCase]
     public void IsNull()
     {
-        AssertBool(true, IGdUnitAssert.EXPECT.FAIL)
+        AssertBool(true, IAssert.EXPECT.FAIL)
             .IsNull()
             .StartsWithFailureMessage("Expecting: 'Null' but was 'True'");
-        AssertBool(false, IGdUnitAssert.EXPECT.FAIL)
+        AssertBool(false, IAssert.EXPECT.FAIL)
             .IsNull()
             .StartsWithFailureMessage("Expecting: 'Null' but was 'False'");
     }
@@ -42,7 +42,7 @@ public class GdUnitBoolAssertImplTest : GdUnitTestSuite
     {
         AssertBool(true).IsEqual(true);
         AssertBool(false).IsEqual(false);
-        AssertBool(true, IGdUnitAssert.EXPECT.FAIL)
+        AssertBool(true, IAssert.EXPECT.FAIL)
             .IsEqual(false)
             .HasFailureMessage("Expecting:\n 'False'\n but was\n 'True'");
     }
@@ -52,7 +52,7 @@ public class GdUnitBoolAssertImplTest : GdUnitTestSuite
     {
         AssertBool(true).IsNotEqual(false);
         AssertBool(false).IsNotEqual(true);
-        AssertBool(true, IGdUnitAssert.EXPECT.FAIL)
+        AssertBool(true, IAssert.EXPECT.FAIL)
             .IsNotEqual(true)
             .HasFailureMessage("Expecting:\n 'True'\n not equal to\n 'True'");
     }
@@ -69,7 +69,7 @@ public class GdUnitBoolAssertImplTest : GdUnitTestSuite
     [TestCase]
     public void OverrideFailureMessage()
     {
-        AssertBool(true, IGdUnitAssert.EXPECT.FAIL)
+        AssertBool(true, IAssert.EXPECT.FAIL)
             .OverrideFailureMessage("Custom failure message")
             .IsNull()
             .HasFailureMessage("Custom failure message");

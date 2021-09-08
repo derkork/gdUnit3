@@ -1,7 +1,6 @@
 using Godot;
-using Godot.Collections;
-using Array = Godot.Collections.Array;
 using System;
+using System.Diagnostics.Contracts;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -10,32 +9,48 @@ namespace GdUnit3
 {
     public class CsTools : Reference
     {
-        public Array GetTestCases(String className)
+        // used from GdScript side, will be remove later
+        public static Array ListTestCases(String className)
         {
             System.Type type = System.Type.GetType(className);
-            Array methods = new Array();
-            List<MethodInfo> methodInfos = new List<MethodInfo>(type.GetMethods().Where(m => m.IsDefined(typeof(GdUnitTestSuite.TestCaseAttribute))).ToList());
-            foreach (var methodInfo in methodInfos)
-            {
-                var attributes = methodInfo.GetCustomAttribute<GdUnitTestSuite.TestCaseAttribute>();
-
-                methods.Add(new Dictionary {
-                    { "name", methodInfo.Name },
-                    { "line_number", attributes.Line }
-                });
-            }
-            return methods;
+            Contract.Requires(Attribute.IsDefined(type, typeof(TestSuiteAttribute)));
+            return type.GetMethods()
+                .Where(m => m.IsDefined(typeof(TestCaseAttribute)))
+                .Select(mi => new TestCase(null, mi))
+                .ToArray();
         }
 
-        public bool IsTestSuite(String className)
+        // used from GdScript side, will be remove later
+        public static bool IsTestSuite(String className)
         {
             System.Type type = System.Type.GetType(className);
             if (type == null)
             {
                 return false;
             }
-            return Attribute.GetCustomAttribute(type, typeof(GdUnitTestSuite.TestSuiteAttribute)) != null;
+            return Attribute.IsDefined(type, typeof(TestSuiteAttribute));
         }
 
+        public static IEnumerable<TestCase> GetTestCases(TestSuite testSuite)
+        {
+            Contract.Requires(Attribute.IsDefined(testSuite.GetType(), typeof(TestSuiteAttribute)));
+            return testSuite.GetType().GetMethods()
+                .Where(m => m.IsDefined(typeof(TestCaseAttribute)))
+                .Select(mi => new TestCase(testSuite, mi));
+        }
+
+        public static System.Collections.Generic.IEnumerable<object> GetTestMethodParameters(MethodInfo methodInfo)
+        {
+            return methodInfo.GetParameters()
+                .SelectMany(pi => pi.GetCustomAttributesData()
+                    .Where(attr => attr.AttributeType == typeof(FuzzerAttribute))
+                    .Select(attr =>
+                    {
+                        var arguments = attr.ConstructorArguments.Select(arg => arg.Value).ToArray();
+                        return attr.Constructor.Invoke(arguments);
+                    }
+                )
+             );
+        }
     }
 }

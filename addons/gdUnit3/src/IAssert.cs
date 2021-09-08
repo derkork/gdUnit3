@@ -1,11 +1,10 @@
-using System;
 using System.ComponentModel;
 
 namespace GdUnit3
 {
 
     /// <summary> Main interface of all GdUnit asserts </summary>
-    public interface IGdUnitAssert
+    public interface IAssert
     {
 
         enum EXPECT : int
@@ -18,31 +17,31 @@ namespace GdUnit3
     }
 
     /// <summary> Base interface of all GdUnit asserts </summary>
-    public interface IGdUnitAssertBase<V> : IGdUnitAssert
+    public interface IAssertBase<V> : IAssert
     {
 
         /// <summary>Verifies that the current value is null.</summary>
-        IGdUnitAssertBase<V> IsNull();
+        IAssertBase<V> IsNull();
 
         /// <summary> Verifies that the current value is not null.</summary>
-        IGdUnitAssertBase<V> IsNotNull();
+        IAssertBase<V> IsNotNull();
 
         /// <summary> Verifies that the current value is equal to expected one.
-        IGdUnitAssertBase<V> IsEqual(V expected);
+        IAssertBase<V> IsEqual(V expected);
 
         /// <summary> Verifies that the current value is not equal to expected one.</summary>
-        IGdUnitAssertBase<V> IsNotEqual(V expected);
+        IAssertBase<V> IsNotEqual(V expected);
 
         /// <summary></summary>
-        IGdUnitAssertBase<V> TestFail();
+        IAssertBase<V> TestFail();
 
         /// <summary> Verifies the failure message is equal to expected one.</summary>
-        IGdUnitAssertBase<V> HasFailureMessage(string expected);
+        IAssertBase<V> HasFailureMessage(string expected);
 
         /// <summary> Verifies that the failure starts with the given value.</summary>
-        IGdUnitAssertBase<V> StartsWithFailureMessage(string value);
+        IAssertBase<V> StartsWithFailureMessage(string value);
 
         /// <summary> Overrides the default failure message by given custom message.</summary>
-        IGdUnitAssertBase<V> OverrideFailureMessage(string message);
+        IAssertBase<V> OverrideFailureMessage(string message);
     }
 }
