@@ -252,8 +252,8 @@ func execute(test_suite :GdUnitTestSuiteDelegator) -> GDScriptFunctionState:
 		for test_case_index in test_suite.get_test_cases_count():
 			var test_case = test_suite.get_test_case(test_case_index)
 			# only iterate over test case, we need to filter because of possible adding other child types on before() or before_test()
-			#if not test_case is _TestCase:
-			#	continue
+			if not test_case is _TestCase and not GdObjects.is_cs_script(test_case.get_script()):
+				continue
 			# stop on first error if fail fast enabled
 			if _fail_fast and _total_test_failed > 0:
 				break
