@@ -12,7 +12,7 @@ namespace GdUnit3
         {
             this.TestSuite = testSuite;
             this.Name = methodInfo.Name;
-            this.Test = methodInfo;
+            this.MethodInfo = methodInfo;
             this.Parameters = CsTools.GetTestMethodParameters(methodInfo).ToArray();
         }
 
@@ -22,10 +22,10 @@ namespace GdUnit3
         }
 
         public TestCaseAttribute Attributes
-        { get => Test.GetCustomAttribute<TestCaseAttribute>(); }
+        { get => MethodInfo.GetCustomAttribute<TestCaseAttribute>(); }
 
 
-        public bool IsSkipped => Attribute.IsDefined(Test, typeof(IgnoreUntilAttribute));
+        public bool IsSkipped => Attribute.IsDefined(MethodInfo, typeof(IgnoreUntilAttribute));
 
         public Godot.Collections.Dictionary attributes()
         {
@@ -82,7 +82,7 @@ namespace GdUnit3
         private IEnumerable<object> Parameters
         { get; set; }
 
-        private MethodInfo Test
+        private MethodInfo MethodInfo
         { get; set; }
 
         public TestSuite TestSuite
@@ -101,7 +101,7 @@ namespace GdUnit3
         {
             Godot.GD.PrintS("TestCase ->", Name);
             object[] arguments = Parameters.SelectMany(ResolveParam).ToArray<object>();
-            Test.Invoke(TestSuite, arguments);
+            MethodInfo.Invoke(TestSuite, arguments);
         }
     }
 }
