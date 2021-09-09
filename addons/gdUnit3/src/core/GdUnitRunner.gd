@@ -6,8 +6,6 @@ signal sync_rpc_id_result_received
 
 onready var _client :GdUnitTcpClient = $GdUnitTcpClient
 onready var _executor :GdUnitExecutor = $GdUnitExecutor
-onready var _cs_executor = preload("res://addons/gdUnit3/src/core/execution/Executor.cs").new()
-
 
 enum {
 	INIT,
@@ -19,6 +17,7 @@ var _config := GdUnitRunnerConfig.new()
 var _test_suites_to_process :Array
 var _state = INIT
 var _signal_handler :SignalHandler
+var _cs_executor
 
 # holds the received sync rpc result
 var _result :Result
@@ -31,6 +30,8 @@ func _init():
 	_signal_handler = GdUnitSingleton.get_or_create_singleton(SignalHandler.SINGLETON_NAME, "res://addons/gdUnit3/src/core/event/SignalHandler.gd")
 	# store current runner instance to engine meta data to can be access in as a singleton
 	Engine.set_meta(GDUNIT_RUNNER, self)
+	if GdUnitTools.is_mono_supported():
+		_cs_executor = load("res://addons/gdUnit3/src/core/execution/Executor.cs").new()
 
 func _ready():
 	_config.load()

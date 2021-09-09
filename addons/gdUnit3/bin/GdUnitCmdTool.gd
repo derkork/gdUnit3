@@ -15,7 +15,6 @@ class CLIRunner extends Node:
 	const RETURN_ERROR    = 100
 	const RETURN_WARNING  = 101
 	
-	onready var _cs_executor = preload("res://addons/gdUnit3/src/core/execution/Executor.cs").new()
 	
 	var _state = INIT
 	var _signal_handler
@@ -26,6 +25,7 @@ class CLIRunner extends Node:
 	var _report_max: int = DEFAULT_REPORT_COUNT
 	var _runner_config := GdUnitRunnerConfig.new()
 	var _console := CmdConsole.new()
+	var _cs_executor
 	
 	var _cmd_options: = CmdOptions.new([
 			CmdOption.new("-a, --add", "-a <directory|path of testsuite>", "Adds the given test suite or directory to the execution pipeline.", TYPE_STRING),
@@ -51,6 +51,10 @@ class CLIRunner extends Node:
 		_executor.disable_default_yield()
 		# stop on first test failure to fail fast
 		_executor.fail_fast(true)
+		
+		if GdUnitTools.is_mono_supported():
+			_cs_executor = load("res://addons/gdUnit3/src/core/execution/Executor.cs").new()
+		
 		var err := _executor.connect("send_event", self, "_on_executor_event")
 		if err != OK:
 			push_error("Error on startup, can't connect executor for 'send_event'")
