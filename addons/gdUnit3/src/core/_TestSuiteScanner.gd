@@ -81,16 +81,15 @@ func _parse_cs_test_suite(script :Script) -> Node:
 	var csTools = GdUnitSingleton.get_or_create_singleton("CsTools", "res://addons/gdUnit3/src/core/CsTools.cs")
 	var cs_test_cases =  csTools.ListTestCases(script.resource_path.get_file().replace(".cs", ""))
 	for test_case in cs_test_cases:
-		#var test := _TestCase.new()
-		#var attributes :Dictionary = test_case.attributes();
-		#test.configure(attributes.get("name"), attributes.get("line_number"), script.resource_path)
+		var test := _TestCase.new()
+		var attributes :Dictionary = test_case.attributes();
+		test.configure(attributes.get("name"), attributes.get("line_number"), script.resource_path)
 		#test._iterations = meta.get("iterations")
 		#if meta.get("hasFuzzer") == true:
 		#	test._fuzzers = PoolStringArray(["fuzz"])
 			
-		test_suite.add_child(test_case)
-		test_case.set_parent(test_suite)
-		#test_case.free()
+		test_suite.add_child(test)
+		#test_case.set_parent(test_suite)
 	return test_suite
 
 

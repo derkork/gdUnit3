@@ -5,26 +5,20 @@ namespace GdUnit3
 
         public void execute(TestSuite testSuite)
         {
-            Godot.GD.PrintS("Executor start");
-            var beforeTest = new BeforeTestExecutionLayer(testSuite);
-            var afterTest = new AfterTestExecutionLayer(testSuite);
+            var type = testSuite.GetType();
+            var testExecutor = new TestCaseExecutionStage(new BeforeTestExecutionStage(type), new AfterTestExecutionStage(type));
 
-            foreach (TestCase testCase in CsTools.GetTestCases(testSuite))
+            var context = new ExecutionContext(testSuite);
+            new BeforeExecutionStage(type).Execute(context);
+            foreach (TestCase testCase in CsTools.GetTestCases(type))
             {
-                Godot.GD.PrintS("");
-                if (testCase.IsSkipped)
-                {
-                    Godot.GD.PrintS("skip", testCase.Name);
-                    testCase.Free();
-                    continue;
-                }
-                beforeTest.Execute();
-                new TestCaseExecutionLayer(testCase).Execute();
-                afterTest.Execute();
+                context.Test = testCase;
+                context.CurrentIteration = testCase.Attributes.iterations;
+                context.Skipped = testCase.Skipped;
+
+                testExecutor.Execute(context);
             }
-
-            Godot.GD.PrintS("Executor end");
+            new AfterExecutionStage(type).Execute(context);
         }
-
     }
 }

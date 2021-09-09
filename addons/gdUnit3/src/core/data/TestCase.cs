@@ -6,26 +6,24 @@ using System;
 
 namespace GdUnit3
 {
-    public sealed class TestCase : Godot.Node, IDisposable
+    public sealed class TestCase : Godot.Reference, IExecutionStage
     {
-        public TestCase(TestSuite testSuite, MethodInfo methodInfo)
+        public TestCase(MethodInfo methodInfo)
         {
-            this.TestSuite = testSuite;
             this.Name = methodInfo.Name;
             this.MethodInfo = methodInfo;
             this.Parameters = CsTools.GetTestMethodParameters(methodInfo).ToArray();
         }
 
-        ~TestCase()
-        {
-            this.TestSuite = null;
-        }
+        public string Name
+        { get; set; }
+
+        public string StageName() => "Test";
 
         public TestCaseAttribute Attributes
         { get => MethodInfo.GetCustomAttribute<TestCaseAttribute>(); }
 
-
-        public bool IsSkipped => Attribute.IsDefined(MethodInfo, typeof(IgnoreUntilAttribute));
+        public bool Skipped => Attribute.IsDefined(MethodInfo, typeof(IgnoreUntilAttribute));
 
         public Godot.Collections.Dictionary attributes()
         {
@@ -59,11 +57,6 @@ namespace GdUnit3
             return false;
         }
 
-        public void set_parent(Godot.Node testSuite)
-        {
-            TestSuite = testSuite as TestSuite;
-        }
-
         public bool is_interupted()
         {
             return false;
@@ -85,9 +78,6 @@ namespace GdUnit3
         private MethodInfo MethodInfo
         { get; set; }
 
-        public TestSuite TestSuite
-        { get; set; }
-
         private IEnumerable<object> ResolveParam(object input)
         {
             if (input is IValueProvider)
@@ -97,11 +87,10 @@ namespace GdUnit3
             return new object[] { input };
         }
 
-        public void execute()
+        public void Execute(ExecutionContext context)
         {
-            Godot.GD.PrintS("TestCase ->", Name);
             object[] arguments = Parameters.SelectMany(ResolveParam).ToArray<object>();
-            MethodInfo.Invoke(TestSuite, arguments);
+            MethodInfo.Invoke(context.TestInstance, arguments);
         }
     }
 }
