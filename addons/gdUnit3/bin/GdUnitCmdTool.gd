@@ -15,6 +15,8 @@ class CLIRunner extends Node:
 	const RETURN_ERROR    = 100
 	const RETURN_WARNING  = 101
 	
+	onready var _cs_executor = preload("res://addons/gdUnit3/src/core/execution/Executor.cs").new()
+	
 	var _state = INIT
 	var _signal_handler
 	var _test_suites_to_process :Array
@@ -67,10 +69,13 @@ class CLIRunner extends Node:
 					_state = STOP
 				else:
 					# process next test suite
-					var test_suite := _test_suites_to_process.pop_front() as GdUnitTestSuiteDelegator
-					var fs = _executor.execute(test_suite)
-					if fs is GDScriptFunctionState:
-						yield(fs, "completed")
+					var test_suite := _test_suites_to_process.pop_front() as Node
+					if GdObjects.is_cs_script(test_suite.get_script()):
+						_cs_executor.execute(test_suite)
+					else:
+						var fs = _executor.execute(test_suite)
+						if fs is GDScriptFunctionState:
+							yield(fs, "completed")
 				set_process(true)
 			STOP:
 				_state = EXIT
@@ -201,7 +206,7 @@ class CLIRunner extends Node:
 		for test_suite in test_suites:
 			skip_suite(test_suite, skipped)
 	
-	func skip_suite(test_suite :GdUnitTestSuiteDelegator, skipped :Dictionary) -> void:
+	func skip_suite(test_suite :Node, skipped :Dictionary) -> void:
 		var skipped_suites := skipped.keys()
 		if skipped_suites.empty():
 			return

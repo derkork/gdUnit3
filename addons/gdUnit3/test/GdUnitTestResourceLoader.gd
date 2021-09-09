@@ -7,7 +7,7 @@ enum {
 }
 
 
-static func load_test_suite(resource_path :String, script_type = GD_SUITE) -> GdUnitTestSuiteDelegator:
+static func load_test_suite(resource_path :String, script_type = GD_SUITE) -> Node:
 	match script_type:
 		GD_SUITE:
 			return load_test_suite_gd(resource_path)
@@ -16,7 +16,7 @@ static func load_test_suite(resource_path :String, script_type = GD_SUITE) -> Gd
 	assert("type '%s' is not impleented" % script_type)
 	return null
 
-static func load_test_suite_gd(resource_path :String) -> GdUnitTestSuiteDelegator:
+static func load_test_suite_gd(resource_path :String) -> Node:
 	var script := GDScript.new()
 	script.source_code = GdUnitTools.resource_as_string(resource_path)
 	script.resource_path = resource_path
@@ -30,10 +30,10 @@ static func load_test_suite_gd(resource_path :String) -> GdUnitTestSuiteDelegato
 	# add test cases to test suite and parse test case line nummber
 	suite_parser._parse_and_add_test_cases(test_suite, script, test_case_names)
 	suite_parser.free()
-	return GdUnitTestSuiteDelegator.new(test_suite)
+	return test_suite
 
 
-static func load_test_suite_cs(resource_path :String) -> GdUnitTestSuiteDelegator:
+static func load_test_suite_cs(resource_path :String) -> Node:
 	if not GdUnitTools.is_mono_supported():
 		return null
 	var script = ClassDB.instance("CSharpScript")

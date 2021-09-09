@@ -6,6 +6,7 @@ signal sync_rpc_id_result_received
 
 onready var _client :GdUnitTcpClient = $GdUnitTcpClient
 onready var _executor :GdUnitExecutor = $GdUnitExecutor
+onready var _cs_executor = preload("res://addons/gdUnit3/src/core/execution/Executor.cs").new()
 
 
 enum {
@@ -58,13 +59,16 @@ func _process(delta):
 				_state = STOP
 			else:
 				# process next test suite
-				var test_suite := _test_suites_to_process.pop_front() as GdUnitTestSuiteDelegator
-				var fs = _executor.execute(test_suite)
-				# is yielded than wait for completed
-				if GdUnitTools.is_yielded(fs):
-					set_process(false)
-					yield(fs, "completed")
-					set_process(true)
+				var test_suite = _test_suites_to_process.pop_front()
+				if GdObjects.is_cs_script(test_suite.get_script()):
+					_cs_executor.execute(test_suite)
+				else:
+					var fs = _executor.execute(test_suite)
+					# is yielded than wait for completed
+					if GdUnitTools.is_yielded(fs):
+						set_process(false)
+						yield(fs, "completed")
+						set_process(true)
 		STOP:
 			_state = EXIT
 			# give the engine small amount time to finish the rpc
@@ -111,14 +115,14 @@ func _filter_test_case(test_suites :Array, includes_tests :Array) -> void:
 func _collect_test_case_count(testSuites :Array) -> int:
 	var total :int = 0
 	for test_suite in testSuites:
-		total += (test_suite as GdUnitTestSuiteDelegator).get_test_cases_count()
+		total += (test_suite as Node).get_child_count()
 	return total
 
 # RPC send functions
 func send_message(message :String):
 	_client.rpc_send(RPCMessage.of(message))
 
-func send_test_suite(test_suite :GdUnitTestSuiteDelegator):
+func send_test_suite(test_suite):
 	_client.rpc_send(RPCGdUnitTestSuite.of(test_suite))
 
 func _on_Executor_send_event(event :GdUnitEvent):

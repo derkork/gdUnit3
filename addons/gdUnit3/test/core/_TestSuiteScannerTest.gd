@@ -146,7 +146,7 @@ func test_scan_by_inheritance_class_name() -> void:
 	var scanner :_TestSuiteScanner = auto_free(_TestSuiteScanner.new())
 	var test_suites := scanner.scan("res://addons/gdUnit3/test/core/resources/scan_testsuite_inheritance/by_class_name/")
 	
-	assert_array(test_suites).extractv(extr("get_name"), extr("get_script.get_path"), extr("get_test_cases.get_name"))\
+	assert_array(test_suites).extractv(extr("get_name"), extr("get_script.get_path"), extr("get_children.get_name"))\
 		.contains_exactly_in_any_order([
 			tuple("BaseTest", "res://addons/gdUnit3/test/core/resources/scan_testsuite_inheritance/by_class_name/BaseTest.gd", ["test_foo1"]),
 			tuple("ExtendedTest","res://addons/gdUnit3/test/core/resources/scan_testsuite_inheritance/by_class_name/ExtendedTest.gd", ["test_foo2", "test_foo1"]), 
@@ -160,7 +160,7 @@ func test_scan_by_inheritance_class_path() -> void:
 	var scanner :_TestSuiteScanner = auto_free(_TestSuiteScanner.new())
 	var test_suites := scanner.scan("res://addons/gdUnit3/test/core/resources/scan_testsuite_inheritance/by_class_path/")
 	
-	assert_array(test_suites).extractv(extr("get_name"), extr("get_script.get_path"), extr("get_test_cases.get_name"))\
+	assert_array(test_suites).extractv(extr("get_name"), extr("get_script.get_path"), extr("get_children.get_name"))\
 		.contains_exactly_in_any_order([
 			tuple("BaseTest", "res://addons/gdUnit3/test/core/resources/scan_testsuite_inheritance/by_class_path/BaseTest.gd", ["test_foo1"]),
 			tuple("ExtendedTest","res://addons/gdUnit3/test/core/resources/scan_testsuite_inheritance/by_class_path/ExtendedTest.gd", ["test_foo2", "test_foo1"]), 

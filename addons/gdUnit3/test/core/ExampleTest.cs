@@ -5,22 +5,26 @@ using GdUnit3;
 [TestSuite]
 public class ExampleTest : TestSuite
 {
-    public override void Before()
+    [Before]
+    public void Before()
     {
         GD.PrintS("calling Before");
     }
 
-    public override void After()
+    [After]
+    public void After()
     {
         GD.PrintS("calling After");
     }
 
-    public override void BeforeTest()
+    [BeforeTest]
+    public void BeforeTest()
     {
         GD.PrintS("calling BeforeTest");
     }
 
-    public override void AfterTest()
+    [AfterTest]
+    public void AfterTest()
     {
         GD.PrintS("calling AfterTest");
     }

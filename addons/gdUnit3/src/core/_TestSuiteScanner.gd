@@ -52,7 +52,7 @@ static func _file(dir :Directory, file_name :String) -> String:
 		return current_dir + file_name
 	return current_dir + "/" + file_name
 
-func _parse_is_test_suite(resource_path :String) -> GdUnitTestSuiteDelegator:
+func _parse_is_test_suite(resource_path :String) -> Node:
 	if not _is_script_format_supported(resource_path):
 		return null
 	# exclude non test directories
@@ -62,9 +62,9 @@ func _parse_is_test_suite(resource_path :String) -> GdUnitTestSuiteDelegator:
 	if not GdObjects.is_test_suite(script):
 		return null
 	if GdObjects.is_gd_script(script):
-		return GdUnitTestSuiteDelegator.new(_parse_test_suite(script))
+		return _parse_test_suite(script)
 	if GdObjects.is_cs_script(script):
-		return GdUnitTestSuiteDelegator.new(_parse_cs_test_suite(script))
+		return _parse_cs_test_suite(script)
 	return null
 
 static func _is_script_format_supported(resource_path :String) -> bool:
@@ -78,18 +78,7 @@ static func _is_script_format_supported(resource_path :String) -> bool:
 func _parse_cs_test_suite(script :Script) -> Node:
 	var test_suite = script.new()
 	test_suite.set_name(parse_test_suite_name(script))
-	var csTools = GdUnitSingleton.get_or_create_singleton("CsTools", "res://addons/gdUnit3/src/core/CsTools.cs")
-	var cs_test_cases =  csTools.ListTestCases(script.resource_path.get_file().replace(".cs", ""))
-	for test_case in cs_test_cases:
-		var test := _TestCase.new()
-		var attributes :Dictionary = test_case.attributes();
-		test.configure(attributes.get("name"), attributes.get("line_number"), script.resource_path)
-		#test._iterations = meta.get("iterations")
-		#if meta.get("hasFuzzer") == true:
-		#	test._fuzzers = PoolStringArray(["fuzz"])
-			
-		test_suite.add_child(test)
-		#test_case.set_parent(test_suite)
+	
 	return test_suite
 
 

@@ -10,14 +10,12 @@ namespace GdUnit3
     public class CsTools : Reference
     {
         // used from GdScript side, will be remove later
-        public static Array ListTestCases(String className)
+        public static int TestCaseCount(Type type)
         {
-            System.Type type = System.Type.GetType(className);
             Contract.Requires(Attribute.IsDefined(type, typeof(TestSuiteAttribute)), "The class must have TestSuiteAttribute.");
             return type.GetMethods()
                 .Where(m => m.IsDefined(typeof(TestCaseAttribute)))
-                .Select(mi => new TestCase(mi))
-                .ToArray();
+                .Count();
         }
 
         // used from GdScript side, will be remove later

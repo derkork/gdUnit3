@@ -17,9 +17,9 @@ namespace GdUnit3
     <code>
     public class MyExampleTest : GdUnit3.GdUnitTestSuite
     {
-         public void test_testCaseA()
+         public void testCaseA()
          {
-             assertThat("value").isEqual("value");
+             AssertThat("value").IsEqual("value");
          }
      }
     </code>
@@ -27,48 +27,15 @@ namespace GdUnit3
     </summary> */
     public abstract class TestSuite : Node
     {
-        private bool _scipped = false;
         private String _active_test_case;
 
         private static Godot.Resource GdUnitTools = (Resource)GD.Load<GDScript>("res://addons/gdUnit3/src/core/GdUnitTools.gd").New();
 
 
-
-        ~TestSuite()
+        // current we overide it to get the correct count of tests
+        public int get_child_count()
         {
-        }
-
-        /// <summary>
-        /// This function is called before a test suite starts
-        /// You can overwrite to prepare test data or initalizize necessary variables
-        /// </summary>
-        public virtual void Before() { }
-
-        // This function is called at least when a test suite is finished
-        // You can overwrite to cleanup data created during test running
-        public virtual void After() { }
-
-        // This function is called before a test case starts
-        // You can overwrite to prepare test case specific data
-        public virtual void BeforeTest() { }
-
-        // This function is called after the test case is finished
-        // You can overwrite to cleanup your test case specific data
-        public virtual void AfterTest() { }
-
-        // Skip the test-suite from execution, it will be ignored
-        public void skip(bool skipped) => _scipped = skipped;
-
-        public bool is_skipped => _scipped;
-
-        public void set_active_test_case(String test_case) => _active_test_case = test_case;
-
-        // === Tools ====================================================================
-        // Mapps Godot error number to a readable error message. See at ERROR
-        // https://docs.godotengine.org/de/stable/classes/class_@globalscope.html#enum-globalscope-error
-        public String error_as_string(int error_number)
-        {
-            return (String)GdUnitTools.Call("error_as_string", error_number);
+            return CsTools.TestCaseCount(GetType());
         }
 
         // A litle helper to auto freeing your created objects after test execution

@@ -5,11 +5,6 @@ using GdUnit3;
 public class NotATestSuite : TestSuite
 {
 
-    public override void Before()
-    {
-        GD.PrintS("calling Before");
-    }
-
     [TestCase]
     public void TestFoo()
     {

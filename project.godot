@@ -734,11 +734,6 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://addons/gdUnit3/src/GdUnitTestSuite.gd"
 }, {
-"base": "Node",
-"class": "GdUnitTestSuiteDelegator",
-"language": "GDScript",
-"path": "res://addons/gdUnit3/src/core/GdUnitTestSuiteDelegator.gd"
-}, {
 "base": "GdUnitResourceDto",
 "class": "GdUnitTestSuiteDto",
 "language": "GDScript",
@@ -1135,7 +1130,6 @@ _global_script_class_icons={
 "GdUnitTestCaseReport": "",
 "GdUnitTestResourceLoader": "",
 "GdUnitTestSuite": "",
-"GdUnitTestSuiteDelegator": "",
 "GdUnitTestSuiteDto": "",
 "GdUnitTestSuiteReport": "",
 "GdUnitTestSuiteTest": "",
@@ -1210,6 +1204,7 @@ enabled=PoolStringArray( "res://addons/gdUnit3/plugin.cfg" )
 
 report/assert/verbose_errors=false
 report/assert/verbose_warnings=false
+settings/update_notification_enabled=false
 
 [network]
 
