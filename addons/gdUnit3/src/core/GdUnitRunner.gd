@@ -22,6 +22,7 @@ var _cs_executor
 # holds the received sync rpc result
 var _result :Result
 
+
 func _init():
 	# minimize scene window on debug mode
 	if OS.get_cmdline_args().size() == 1:
@@ -32,6 +33,7 @@ func _init():
 	Engine.set_meta(GDUNIT_RUNNER, self)
 	if GdUnitTools.is_mono_supported():
 		_cs_executor = load("res://addons/gdUnit3/src/core/execution/Executor.cs").new()
+		_cs_executor.AddGdTestEventListener(self)
 
 func _ready():
 	_config.load()
@@ -127,6 +129,10 @@ func send_test_suite(test_suite):
 	_client.rpc_send(RPCGdUnitTestSuite.of(test_suite))
 
 func _on_Executor_send_event(event :GdUnitEvent):
+	_client.rpc_send(RPCGdUnitEvent.of(event))
+
+func TestEvent(data) -> void:
+	var event := GdUnitEvent.new().deserialize(data.AsDictionary())
 	_client.rpc_send(RPCGdUnitEvent.of(event))
 
 #func get_last_push_error() -> Result:

@@ -1,12 +1,12 @@
+
+using System;
 using System.Linq;
 using System.Reflection;
-using System;
 
 namespace GdUnit3
 {
     public abstract class ExecutionStage<T> : IExecutionStage
     {
-
         private readonly string _name;
 #nullable enable
         private readonly MethodInfo? _mi;
@@ -20,7 +20,7 @@ namespace GdUnit3
                .FirstOrDefault(m => m.IsDefined(typeof(T)));
         }
 
-        public void Execute(ExecutionContext context)
+        public virtual void Execute(ExecutionContext context)
         {
             _mi?.Invoke(context.TestInstance, new object[] { });
         }

@@ -54,6 +54,7 @@ class CLIRunner extends Node:
 		
 		if GdUnitTools.is_mono_supported():
 			_cs_executor = load("res://addons/gdUnit3/src/core/execution/Executor.cs").new()
+			_cs_executor.AddGdTestEventListener(self)
 		
 		var err := _executor.connect("send_event", self, "_on_executor_event")
 		if err != OK:
@@ -238,6 +239,9 @@ class CLIRunner extends Node:
 			total += (test_suite as Node).get_child_count()
 		return total
 	
+	func TestEvent(data) -> void:
+		_on_executor_event(GdUnitEvent.new().deserialize(data.AsDictionary()))
+
 	func _on_executor_event(event :GdUnitEvent):
 		match event.type():
 			GdUnitEvent.INIT:

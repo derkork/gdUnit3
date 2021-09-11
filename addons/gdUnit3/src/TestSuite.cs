@@ -35,7 +35,7 @@ namespace GdUnit3
         // current we overide it to get the correct count of tests
         public int get_child_count()
         {
-            return CsTools.TestCaseCount(GetType());
+            return TestCaseCount;
         }
 
         // A litle helper to auto freeing your created objects after test execution
@@ -68,6 +68,13 @@ namespace GdUnit3
         {
             //GdUnitTools.clear_tmp()
         }
+
+        public int TestCaseCount => CsTools.TestCaseCount(GetType());
+
+        public string ResourcePath => (GetScript() as Script).ResourcePath;
+
+        public bool Skipped => false;
+
 
         // === Asserts ==================================================================
         public IBoolAssert AssertBool(bool current, IAssert.EXPECT expectResult = IAssert.EXPECT.SUCCESS)

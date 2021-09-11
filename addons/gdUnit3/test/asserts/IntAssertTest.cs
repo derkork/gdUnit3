@@ -1,5 +1,4 @@
 using GdUnit3;
-
 using Godot;
 using static GdUnit3.IAssert.EXPECT;
 

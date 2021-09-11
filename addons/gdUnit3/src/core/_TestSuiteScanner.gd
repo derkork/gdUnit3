@@ -78,7 +78,12 @@ static func _is_script_format_supported(resource_path :String) -> bool:
 func _parse_cs_test_suite(script :Script) -> Node:
 	var test_suite = script.new()
 	test_suite.set_name(parse_test_suite_name(script))
-	
+	var cs_tools = load("res://addons/gdUnit3/src/core/CsTools.cs").new()
+	for test_case in cs_tools.GetTestCases(script.resource_path.get_file().replace(".cs", "")):
+		var test := _TestCase.new()
+		var attributes :Dictionary = test_case.attributes();
+		test.configure(attributes.get("name"), attributes.get("line_number"), script.resource_path)
+		test_suite.add_child(test)
 	return test_suite
 
 

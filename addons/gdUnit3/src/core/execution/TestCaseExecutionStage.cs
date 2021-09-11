@@ -1,34 +1,33 @@
+using System;
+
 namespace GdUnit3
 {
     public sealed class TestCaseExecutionStage : IExecutionStage
     {
-        public TestCaseExecutionStage(IExecutionStage before, IExecutionStage after)
+        public TestCaseExecutionStage(Type type)
         {
-            Before = before;
-            After = after;
+            BeforeTestStage = new BeforeTestExecutionStage(type);
+            AfterTestStage = new AfterTestExecutionStage(type);
         }
 
-        public string StageName()
-        {
-            return "TestCaseIteration";
-        }
+        public string StageName() => "TestCases";
 
-        private IExecutionStage Before
+        private IExecutionStage BeforeTestStage
         { get; set; }
-        private IExecutionStage After
+        private IExecutionStage AfterTestStage
         { get; set; }
 
         public void Execute(ExecutionContext context)
         {
-            if (context.Skipped)
-            { return; }
-
-            Before.Execute(context);
-            while (context.CurrentIteration != 0)
+            using (ExecutionContext currentContext = new ExecutionContext(context))
             {
-                context.Test.Execute(context);
+                BeforeTestStage.Execute(currentContext);
+                while (!currentContext.Skipped && currentContext.CurrentIteration != 0)
+                {
+                    currentContext.Test.Execute(currentContext);
+                }
+                AfterTestStage.Execute(currentContext);
             }
-            After.Execute(context);
         }
     }
 }

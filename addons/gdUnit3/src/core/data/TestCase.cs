@@ -18,7 +18,7 @@ namespace GdUnit3
         public string Name
         { get; set; }
 
-        public string StageName() => "Test";
+        public string StageName() => "TestCase";
 
         public TestCaseAttribute Attributes
         { get => MethodInfo.GetCustomAttribute<TestCaseAttribute>(); }
@@ -36,42 +36,6 @@ namespace GdUnit3
                     { "seed", attributes.seed },
                 };
         }
-
-        public int line_number()
-        {
-            return Attributes.line;
-        }
-
-        public bool is_skipped()
-        {
-            return false;
-        }
-
-        public void generate_seed()
-        {
-
-        }
-
-        public bool has_fuzzer()
-        {
-            return false;
-        }
-
-        public bool is_interupted()
-        {
-            return false;
-        }
-
-        public bool is_expect_interupted()
-        {
-            return false;
-        }
-
-        public int timeout()
-        {
-            return Attributes.timeout;
-        }
-
         private IEnumerable<object> Parameters
         { get; set; }
 

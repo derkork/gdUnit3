@@ -6,5 +6,11 @@ namespace GdUnit3
     {
         public AfterExecutionStage(Type type) : base("After", type)
         { }
+
+        public override void Execute(ExecutionContext context)
+        {
+            base.Execute(context);
+            context.FireTestEvent(TestEvent.After(context.TestInstance.ResourcePath, context.TestInstance.Name));
+        }
     }
 }
