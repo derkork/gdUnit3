@@ -9,8 +9,7 @@ namespace GdUnit3
 
         private List<TestReport> _reports = new List<TestReport>();
         public TestReportCollector()
-        {
-        }
+        { }
 
         // called by GdScript, will be removed after full gd to cs refactoring
         public void consume(Godot.Resource report)
@@ -19,10 +18,9 @@ namespace GdUnit3
             Consume(new TestReport(type, (int)report.Call("line_number"), (string)report.Call("message")));
         }
 
-        public void Consume(TestReport report)
-        {
-            _reports.Add(report);
-        }
+        public void Consume(TestReport report) => _reports.Add(report);
+
+        public void Clear() => _reports.Clear();
 
 
         public IEnumerable<TestReport> Reports

@@ -10,6 +10,7 @@ namespace GdUnit3
     {
         public ExecutionContext(TestSuite testInstance, IEnumerable<ITestEventListener> eventListeners)
         {
+            OrphanMonitor = new OrphanNodesMonitor();
             Stopwatch = new Stopwatch();
             Stopwatch.Start();
 
@@ -23,9 +24,9 @@ namespace GdUnit3
         public ExecutionContext(ExecutionContext context) : this(context.TestInstance, context.EventListeners)
         {
             context.SubExecutionContexts.Add(this);
-            // Test = context.Test ?? null;
-            // Skipped = Test?.Skipped ?? false;
-            // CurrentIteration = Test?.Attributes.iterations ?? 0;
+            Test = context.Test ?? null;
+            Skipped = Test?.Skipped ?? false;
+            CurrentIteration = Test?.Attributes.iterations ?? 0;
         }
 
         public ExecutionContext(ExecutionContext context, TestCase testCase) : this(context.TestInstance, context.EventListeners)
@@ -35,6 +36,9 @@ namespace GdUnit3
             CurrentIteration = testCase.Attributes.iterations;
             Skipped = Test.Skipped;
         }
+
+        public OrphanNodesMonitor OrphanMonitor
+        { get; set; }
 
         public Stopwatch Stopwatch
         { get; private set; }
@@ -46,8 +50,8 @@ namespace GdUnit3
         { get; set; }
 
 #nullable enable
-        public List<ExecutionContext> SubExecutionContexts
-        { get; private set; }
+        private List<ExecutionContext> SubExecutionContexts
+        { get; set; }
 #nullable disable
 
         public TestCase Test
@@ -56,7 +60,7 @@ namespace GdUnit3
         private bool Skipped
         { get; set; }
 
-        public int Duration
+        private int Duration
         { get => (int)Stopwatch.ElapsedMilliseconds; }
 
         private int _iteration;
@@ -87,15 +91,20 @@ namespace GdUnit3
 
         public bool IsSkipped() => Skipped;
 
-        public int SkippedCount() => SubExecutionContexts.Select(context => context.SkippedCount()).Sum() + (IsSkipped() ? 1 : 0);
+        private int SkippedCount() => SubExecutionContexts.Where(context => context.IsSkipped()).Count();
+
+        private int FailureCount() => ReportCollector.Failures.Count();
+
+        private int ErrorCount() => ReportCollector.Errors.Count();
+
+        public int OrphanCount() => SubExecutionContexts.Select(context => context.OrphanMonitor.OrphanCount()).Sum();
 
         public IEnumerable BuildStatistics()
         {
-            var failures = ReportCollector.Failures;
-            var errors = ReportCollector.Errors;
-            return TestEvent.BuildStatistics(0,
-                IsError(), errors.Count(),
-                IsFailed(), failures.Count(),
+            return TestEvent.BuildStatistics(
+                OrphanCount(),
+                IsError(), ErrorCount(),
+                IsFailed(), FailureCount(),
                 false,
                 IsSkipped(), SkippedCount(),
                 Duration);
@@ -107,8 +116,31 @@ namespace GdUnit3
                 .ForEach(l => l.PublishEvent(e));
         }
 
+        public void FireBeforeEvent()
+        {
+            FireTestEvent(TestEvent.Before(TestInstance.ResourcePath, TestInstance.Name, TestInstance.TestCaseCount));
+        }
+
+        public void FireAfterEvent()
+        {
+            FireTestEvent(TestEvent.After(TestInstance.ResourcePath, TestInstance.Name, BuildStatistics()));
+        }
+
+        public void FireBeforeTestEvent()
+        {
+            FireTestEvent(TestEvent.BeforeTest(TestInstance.ResourcePath, TestInstance.Name, Test.Name));
+        }
+
+        public void FireAfterTestEvent()
+        {
+            var testEvent = TestEvent.AfterTest(TestInstance.ResourcePath, TestInstance.Name, Test.Name, BuildStatistics(), ReportCollector.Reports);
+            FireTestEvent(testEvent);
+        }
+
         public void Dispose()
         {
+            ReportCollector.Clear();
+            SubExecutionContexts.Clear();
             Stopwatch.Stop();
         }
 

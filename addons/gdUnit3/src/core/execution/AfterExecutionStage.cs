@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 
 namespace GdUnit3
 {
@@ -10,8 +9,10 @@ namespace GdUnit3
 
         public override void Execute(ExecutionContext context)
         {
+            context.OrphanMonitor.Start();
             base.Execute(context);
-            context.FireTestEvent(TestEvent.After(context.TestInstance.ResourcePath, context.TestInstance.Name, context.BuildStatistics()));
+            context.OrphanMonitor.Stop();
+            context.FireAfterEvent();
         }
     }
 }

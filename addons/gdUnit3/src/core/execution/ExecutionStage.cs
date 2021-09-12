@@ -11,7 +11,6 @@ namespace GdUnit3
 #nullable enable
         private readonly MethodInfo? _mi;
 #nullable disable
-
         protected ExecutionStage(string name, Type type)
         {
             _name = name;

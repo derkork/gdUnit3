@@ -23,15 +23,15 @@ namespace GdUnit3
 
         public void Execute(ExecutionContext context)
         {
-            using (ExecutionContext currentContext = new ExecutionContext(context))
+            BeforeStage.Execute(context);
+            foreach (TestCase testCase in CsTools.GetTestCases(context.TestInstance.GetType()))
             {
-                BeforeStage.Execute(currentContext);
-                foreach (TestCase testCase in CsTools.GetTestCases(context.TestInstance.GetType()))
+                using (ExecutionContext currentContext = new ExecutionContext(context, testCase))
                 {
-                    TestCaseStage.Execute(new ExecutionContext(currentContext, testCase));
+                    TestCaseStage.Execute(currentContext);
                 }
-                AfterStage.Execute(currentContext);
             }
+            AfterStage.Execute(context);
         }
     }
 }

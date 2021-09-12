@@ -113,7 +113,10 @@ func _filter_test_case(test_suites :Array, includes_tests :Array) -> void:
 	if includes_tests.empty():
 		return
 	for test_suite in test_suites:
-		test_suite.filter_tests(includes_tests)
+		for test_case in test_suite.get_children():
+			if not includes_tests.has(test_case.get_name()):
+				test_suite.remove_child(test_case)
+				test_case.free()
 
 func _collect_test_case_count(testSuites :Array) -> int:
 	var total :int = 0

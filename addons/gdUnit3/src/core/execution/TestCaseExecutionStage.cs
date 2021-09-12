@@ -17,12 +17,18 @@ namespace GdUnit3
         private IExecutionStage AfterTestStage
         { get; set; }
 
+
         public void Execute(ExecutionContext context)
         {
             BeforeTestStage.Execute(context);
-            while (!context.IsSkipped() && context.CurrentIteration != 0)
+            using (ExecutionContext currentContext = new ExecutionContext(context))
             {
-                context.Test.Execute(context);
+                currentContext.OrphanMonitor.Start(true);
+                while (!currentContext.IsSkipped() && currentContext.CurrentIteration != 0)
+                {
+                    currentContext.Test.Execute(currentContext);
+                }
+                currentContext.OrphanMonitor.Stop();
             }
             AfterTestStage.Execute(context);
         }
