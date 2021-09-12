@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Threading;
 
 namespace GdUnit3
 {
@@ -16,7 +15,7 @@ namespace GdUnit3
             {
                 _listener = listener;
             }
-            public void PublishEvent(TestEvent testEvent) => _listener.Call("TestEvent", testEvent);
+            public void PublishEvent(TestEvent testEvent) => _listener.Call("PublishEvent", testEvent);
         }
         public void AddGdTestEventListener(Godot.Object listener)
         {
@@ -29,13 +28,8 @@ namespace GdUnit3
             _eventListeners.Add(listener);
         }
 
-
-
         public void execute(TestSuite testSuite)
         {
-
-            // fake report consumer for now, will be replaced by TestEvent listener
-            testSuite.SetMeta("gdunit.report.consumer", this);
             var stage = new TestSuiteExecutionStage(testSuite.GetType());
             stage.Execute(new ExecutionContext(testSuite, _eventListeners));
             testSuite.Free();

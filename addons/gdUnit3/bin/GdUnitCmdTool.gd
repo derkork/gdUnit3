@@ -239,7 +239,7 @@ class CLIRunner extends Node:
 			total += (test_suite as Node).get_child_count()
 		return total
 	
-	func TestEvent(data) -> void:
+	func PublishEvent(data) -> void:
 		_on_executor_event(GdUnitEvent.new().deserialize(data.AsDictionary()))
 
 	func _on_executor_event(event :GdUnitEvent):
@@ -257,7 +257,7 @@ class CLIRunner extends Node:
 				_report.add_testsuite_report(GdUnitTestSuiteReport.new(event.resource_path(), event.suite_name()))
 			
 			GdUnitEvent.TESTSUITE_AFTER:
-				_report.update_test_suite_report(event.resource_path(), event.skipped_count(), event.orphan_nodes(),  event.elapsed_time())
+				_report.update_test_suite_report(event.resource_path(), 0, event.orphan_nodes(),  event.elapsed_time())
 				
 			GdUnitEvent.TESTCASE_BEFORE:
 				_report.add_testcase_report(event.resource_path(), GdUnitTestCaseReport.new(event.resource_path(), event.test_name()))

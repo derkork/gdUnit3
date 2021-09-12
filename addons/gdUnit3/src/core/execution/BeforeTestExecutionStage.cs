@@ -9,8 +9,8 @@ namespace GdUnit3
 
         public override void Execute(ExecutionContext context)
         {
-            base.Execute(context);
             context.FireTestEvent(TestEvent.BeforeTest(context.TestInstance.ResourcePath, context.TestInstance.Name, context.Test.Name));
+            base.Execute(context);
         }
     }
 }

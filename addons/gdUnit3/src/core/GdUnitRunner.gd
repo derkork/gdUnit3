@@ -131,7 +131,7 @@ func send_test_suite(test_suite):
 func _on_Executor_send_event(event :GdUnitEvent):
 	_client.rpc_send(RPCGdUnitEvent.of(event))
 
-func TestEvent(data) -> void:
+func PublishEvent(data) -> void:
 	var event := GdUnitEvent.new().deserialize(data.AsDictionary())
 	_client.rpc_send(RPCGdUnitEvent.of(event))
 

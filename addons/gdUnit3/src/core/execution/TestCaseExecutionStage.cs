@@ -19,15 +19,12 @@ namespace GdUnit3
 
         public void Execute(ExecutionContext context)
         {
-            using (ExecutionContext currentContext = new ExecutionContext(context))
+            BeforeTestStage.Execute(context);
+            while (!context.IsSkipped() && context.CurrentIteration != 0)
             {
-                BeforeTestStage.Execute(currentContext);
-                while (!currentContext.Skipped && currentContext.CurrentIteration != 0)
-                {
-                    currentContext.Test.Execute(currentContext);
-                }
-                AfterTestStage.Execute(currentContext);
+                context.Test.Execute(context);
             }
+            AfterTestStage.Execute(context);
         }
     }
 }
